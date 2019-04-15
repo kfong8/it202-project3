@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>IT 202 Project 3</title>
+</head>
+<body>
+    <canvas id="myCanvas" width="600" height="200" style="border: 1px solid black;">
+
+    </canvas>
+</body>
+<script>
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+
+    var game = {score:0, lives:3, state:"play", level:1};
+
+    var gameObjects = [];
+
+    var asterioidImage = new Image();
+    asterioidImage.src = "https://space-facts.com/wp-content/uploads/asteroid-vesta.png";
+    var healthImage = new Image();
+    healthImage.src = "https://www.nasa.gov/centers/goddard/images/content/638831main_globe_east_2048.jpg";
+    var earth = new Image();
+    earth.src = "https://www.nasa.gov/centers/goddard/images/content/638831main_globe_east_2048.jpg";
+
+    gameObjects.push({type:"harm", x:100, y:75, width:25, height:25, color:"red", img: asterioidImage, speed:1});
+    gameObjects.push({type:"benefit", x:20, y:25, width:35, height:35, color:"yellow", img: healthImage, speed:1});
+
+    gameObjects.push({type:"player", x:20, y:c.height/2, width:30, height:30, color:"green", img:earth, speed:10});
+
+    var player = gameObjects[2];
+
+    var backgroundImage = new Image();
+    backgroundImage.src = "https://cosmos-images1.imgix.net/file/spina/photo/13650/180119_el_gordo_1.jpg?ixlib=rails-2.1.4&auto=format&ch=Width%2CDPR&fit=max&w=835";
+    ctx.font = "30px Comic Sans MS";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+
+    function draw(){
+        ctx.clearRect(0,0,c.width,c.height);
+        ctx.drawImage(backgroundImage, 0, 0);
+
+        for (index in gameObjects){
+            g = gameObjects[index]
+            ctx.beginPath();
+            
+            ctx.drawImage(g.img, g.x, g.y, g.width, g.height);
+
+            if(g.type != "player"){
+                g.x -= g.speed * game.level;
+
+                if(colliding(player,g)){
+                    if(g.type == "harm"){
+                        game.lives--;
+                    }
+                    else if(g.type == "benefit"){
+                        game.score += 100;
+                        
+                        if(game.score % 200 == 0){
+                            game.level ++;
+                            if(game.level % 2 == 0){
+                                gameObjects.push({type:"harm", x:100, y:75, width:25, height:25, color:"red", img: asterioidImage, speed:1});
+                            }
+                        }
+                    }
+                    g.state = "collision";
+                }
+
+                if((g.x + g.width < 0) || g.state == "collision"){
+                    g.x = c.width + g.width;
+                    g.y =  Math.random() * (c.height - 0) + 0;
+                    g.state = "";
+                }
+            }
+        }
+
+        ctx.fillText("Score: " + game.score + " - Lives: " + game.lives + " - Level: " + game.level, c.width/2, 30);
+
+        if(game.lives > 0){
+            window.requestAnimationFrame(draw);
+        }
+        else{
+            gameOver();
+        }
+    }
+
+    function gameOver(){
+        ctx.clearRect(0,0,c.width,c.height);
+        ctx.drawImage(backgroundImage, 0, 0);
+        ctx.fillText("Game Over", c.width/2, 30);
+    }
+
+    window.requestAnimationFrame(draw);
+
+    function colliding(rect1, rect2){
+        var result = false;
+
+        if (rect1.x < rect2.x + rect2.width &&
+            rect1.x + rect1.width > rect2.x &&
+            rect1.y < rect2.y + rect2.height &&
+            rect1.y + rect1.height > rect2.y) {
+            result = true;
+        }
+        return result;
+    }
+
+    document.onkeydown = checkKey;
+
+    function checkKey(e){
+        e = e || window.event;
+
+        if(e.keyCode == '38'){
+            player.y -= player.speed;
+        }
+        else if(e.keyCode == '40'){
+            player.y += player.speed;
+        }
+        else if(e.keyCode == '37'){
+
+        }
+        else if(e.keyCode == '39'){
+
+        }
+    }
+</script>
+</html>
